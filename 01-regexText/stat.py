@@ -34,7 +34,11 @@ def century(file):
             cent = int(cent_string.group(0).rstrip("th"))
             ctr[cent] += 1
         else:
-            cent = int(year.group(0)[:2]) + 1  # only first two digit are needed + correct century (+1)
+            is_border_year = re.search(r"[1-9]000", m.group(0))
+            if is_border_year is None:
+                cent = int(year.group(0)[:2]) + 1  # only first two digit are needed + correct century (+1)
+            else: # border year, e.g. 2000, it is still 20th century
+                cent = int(year.group(0)[:2])
             ctr[cent] += 1
     for k, v in sorted(ctr.items()):
         print("%sth century: %d" % (k, v))
