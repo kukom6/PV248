@@ -8,15 +8,108 @@ class Print:
         self.partiture = partiture
 
     def format(self):
-        return ""  # TODO
+        #  print composer
+        print("Print Number: {}".format(self.print_id))
+        composition = self.edition.composition
+        #  print composer
+        print("Composer: ", end='')
+        if not composition.authors:
+            print("")  # empty [], no composer
+        else:
+            self.print_person_list(composition.authors)
+        #  print title
+        title = composition.name
+        if title is None:
+            print("Title: ")
+        else:
+            print("Title: {}".format(title))
+        #  print genre
+        genre = composition.genre
+        if genre is None:
+            print("Genre: ")
+        else:
+            print("Genre: {}".format(genre))
+        #  print key
+        key = composition.key
+        if key is None:
+            print("Key: ")
+        else:
+            print("Key: {}".format(key))
+        #  print year
+        year = composition.year
+        if year is None:
+            print("Composition Year: ")
+        else:
+            print("Composition Year: {}".format(year))
+        #  print Edition
+        edition = self.edition
+        edition_name = edition.name
+        if edition_name is None:
+            print("Edition: ")
+        else:
+            print("Edition: {}".format(edition_name))
+        #  print Editor
+        print("Editor: ", end='')
+        if not edition.authors:
+            print("")  # empty [], no editors
+        else:
+            self.print_person_list(edition.authors)
+        #  print Voices x
+        voices = composition.voices
+        if not voices:
+            print("Voice 1: ")  # empty [], only Voice 1:
+        else:
+            i = len(voices)
+            for x in range(0, i):
+                voice_name = voices[x].name
+                voice_range = voices[x].range
+                if voice_name is None and voice_range is None:
+                    print("Voice {}: ".format(x + 1))
+                elif voice_name is None:
+                    print("Voice {}: {}".format(x + 1, voice_range))
+                elif voice_range is None:
+                    print("Voice {}: {}".format(x + 1, voice_name))
+                else:
+                    print("Voice {}: {}; {}".format(x+1, voice_range, voice_name))
+        #  print Partiture
+        partiture = self.partiture
+        if partiture:
+            print("Partiture: yes")
+        else:
+            print("Partiture: no")
+        #  print Incipit
+        incipit = composition.incipit
+        if incipit is None:
+            print("Incipit: ")
+        else:
+            print("Incipit: {}".format(incipit))
+        print("")
 
     def composition(self):
         return self.edition.composition
 
-    def __repr__(self):
-        return "Print ID: " + str(self.print_id) + \
-               "\n\tPartiture: " + str(self.partiture) + \
-               "\n\tEdition: \n" + str(self.edition)
+    # auxiliary function because compositors and editors are the same formats.
+    @staticmethod
+    def print_person_list(persons):
+        i = len(persons)
+        for x in range(0, i):
+            person = persons[x]
+            name = person.name
+            born = person.born
+            if born is None:
+                born = ""
+            died = person.died
+            if died is None:
+                died = ""
+            if (person.born is None) and (person.died is None):
+                print('{}'.format(name), end='')
+            else:
+                print('{} ({}--{})'.format(name, born, died), end='')
+            if x < i - 1:
+                print("; ", end='')
+            else:
+                print("")  # it was the last composer
+                break
 
 
 class Edition:
@@ -25,10 +118,6 @@ class Edition:
         self.authors = authors
         self.name = name
 
-    def __repr__(self):
-        return "\t\tName: " + str(self.name) + \
-               "\n\t\tAuthors: " + str(self.authors) + \
-               "\n\t\tComposition: " + str(self.composition)
 
 class Composition:
     def __init__(self, name, incipit, key, genre, year, voices, authors):
@@ -40,24 +129,11 @@ class Composition:
         self.voices = voices
         self.authors = authors
 
-    def __str__(self):
-        return "\n\t\t\tName: " + str(self.name) + \
-               "\n\t\t\tincipit: " + str(self.incipit) + \
-               "\n\t\t\tkey: " + str(self.key) + \
-               "\n\t\t\tgenre: " + str(self.genre) + \
-               "\n\t\t\tyear: " + str(self.year) + \
-               "\n\t\t\tvoices: " + str(self.voices) + \
-               "\n\t\t\tauthors: " + str(self.authors)
-
 
 class Voice:
     def __init__(self, name, range):
         self.name = name
         self.range = range
-
-    def __repr__(self):
-        return "\tName: " + str(self.name) + \
-               "\tRange: " + str(self.range)
 
 
 class Person:
@@ -66,11 +142,6 @@ class Person:
         self.born = born
         self.died = died
 
-    def __repr__(self):
-        return "\tName: " + self.name + \
-               "\tBorn: " + str(self.born) + \
-               "\tDied: " + str(self.died)
-
 
 def load(filename):
     result = []
@@ -78,7 +149,7 @@ def load(filename):
     content = file.read().split("\n\n")
     for part in content:  # One part in the content
         result.append(parse_print(part))
-    # todo sort list
+    result.sort(key=lambda x: x.print_id, reverse=False)
     return result
 
 
@@ -98,11 +169,13 @@ def parse_partiture(part):
 
 
 def parse_edition(part):
-    edition_name_search = re.search(r"Edition: ([\w\s]+)\n", part)
+    edition_name_search = re.search(r"Edition: (.+)\n", part)
     if edition_name_search is None:
         edition_name = None
     else:
         edition_name = edition_name_search.group(1).strip()
+        if edition_name == "":  # when in the value are spaces >1 , it is valid for regex but still it has to be None
+            edition_name = None
     persons = parse_persons_from_editor(part)
     composition = parse_composition(part)
     return Edition(composition, persons, edition_name)
@@ -210,10 +283,10 @@ def parse_voices(part):
         if found_voice.strip() == "":  # empty line or line which contains only white spaces
             result.append(Voice(None, None))
             continue
-        if "--" not in found_voice: # range is not in the voice, so add all just a name
+        if "--" not in found_voice:  # range is not in the voice, so add all just a name
             result.append(Voice(found_voice.strip(), None))
         else:
-            voice_regex = re.search(r"(\w+--\w+)[,;]?(.*)", found_voice)
+            voice_regex = re.search(r"([\w\(\)]+--[\w\(\)]+)[,;]?(.*)", found_voice)  # some range contains ()
             range = voice_regex.group(1).strip()
             name = voice_regex.group(2).strip()
             if name is '':
