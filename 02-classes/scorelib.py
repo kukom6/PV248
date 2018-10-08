@@ -16,7 +16,7 @@ class Print:
         if not composition.authors:
             print("")  # empty [], no composer
         else:
-            self.print_person_list(composition.authors)
+            self.print_person_list(composition.authors, ";")  # in original file, separator between names is ;
         #  print title
         title = composition.name
         if title is None:
@@ -53,7 +53,7 @@ class Print:
         if not edition.authors:
             print("")  # empty [], no editors
         else:
-            self.print_person_list(edition.authors)
+            self.print_person_list(edition.authors, ",")  # in original file, separator between names is ,
         #  print Voices x
         voices = composition.voices
         if not voices:
@@ -83,14 +83,13 @@ class Print:
             print("Incipit: ")
         else:
             print("Incipit: {}".format(incipit))
-        print("")
 
     def composition(self):
         return self.edition.composition
 
     # auxiliary function because compositors and editors are the same formats.
     @staticmethod
-    def print_person_list(persons):
+    def print_person_list(persons, separator):
         i = len(persons)
         for x in range(0, i):
             person = persons[x]
@@ -106,7 +105,7 @@ class Print:
             else:
                 print('{} ({}--{})'.format(name, born, died), end='')
             if x < i - 1:
-                print("; ", end='')
+                print("{} ".format(separator), end='')
             else:
                 print("")  # it was the last composer
                 break
@@ -148,6 +147,8 @@ def load(filename):
     file = open(filename, 'r', encoding='UTF8')
     content = file.read().split("\n\n")
     for part in content:  # One part in the content
+        if part is "":  # When after last print is empty line, last content after split will be empty
+            continue
         result.append(parse_print(part))
     result.sort(key=lambda x: x.print_id, reverse=False)
     return result

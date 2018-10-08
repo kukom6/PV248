@@ -9,6 +9,7 @@ def main():
         list_of_prints = scorelib.load(sys.argv[1])
         for content in list_of_prints:
             content.format()
+            print()
 
 
 main()
