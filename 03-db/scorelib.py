@@ -187,7 +187,7 @@ def parse_persons_from_editor(part):
     persons_search = re.search(r"Editor: (.+)", part)
     if persons_search is None:
         return result
-    names = persons_search.group(1)
+    names = re.sub(r'\(.*\)', ' ', persons_search.group(1)).strip()  # remove  () from name
     if "," not in names:  # only one name
         result.append(Person(names, None, None))
         return result
@@ -213,13 +213,13 @@ def parse_name_by_comma(names):
                 was_space_or_surname_comma = True
             else:
                 if was_space_or_surname_comma:  # this is the separate comma, save buffer, reset buffer and flag
-                    result.append(Person(''.join(buffer).strip(), None, None))
+                    result.append(Person(re.sub(r'\(.*\)', ' ', ''.join(buffer).strip()).strip(), None, None))
                     buffer.clear()
                     was_space_or_surname_comma = False
                 else:  # just comma in the name, this comma has to be in the name
                     buffer.append(c)
 
-    result.append(Person(''.join(buffer).strip(), None, None))  # buffer contains last name, append it
+    result.append(Person(re.sub(r'\(.*\)', ' ', ''.join(buffer).strip()).strip(), None, None))  # buffer contains last name, append it
     buffer.clear()
     return result
 
