@@ -43,12 +43,30 @@ def save_print(print, cursor):
                    (print.print_id, 'Y' if print.partiture else 'N', id_edition))
 
 
+# save edition method, two editions are same ONLY if edition and editor are same
 def save_edition(edition, cursor):
     id_compostion = save_composition(edition.composition, cursor)
-    exist_edition = cursor.execute("SELECT * FROM edition WHERE name = ?", (edition.name,)).fetchone()
-    # TODO join
-    if exist_edition:
-        edition_id = exist_edition[0]
+    exist_editions = cursor.execute("SELECT * FROM edition WHERE name = ?", (edition.name,)).fetchall()
+
+    # founded editions with same names, need check editor whether are same
+    if exist_editions:
+        exactly_same = False
+        for exist_composition in exist_editions:
+            edition_id = exist_composition[0]
+            editors_for_this_editor = cursor.execute("SELECT person.name FROM edition_author JOIN person "
+                                                                 "WHERE edition_author.edition = ? AND "
+                                                                 "edition_author.editor=person.id",
+                                                                 (edition_id,)).fetchall()
+            if same_persons(edition.authors, editors_for_this_editor):
+                edition_id = exist_composition[0]
+                exactly_same = True
+                break
+        # for  doesn't found any exactly same composition in DB we can add it to db
+        if not exactly_same:
+            cursor.execute("INSERT INTO edition (score, name, year) VALUES (?, ?, ?)",
+                           (id_compostion, edition.name, None))
+            edition_id = cursor.lastrowid
+    # in db is not similar edition, just add this one
     else:
         cursor.execute("INSERT INTO edition (score, name, year) VALUES (?, ?, ?)",
                        (id_compostion, edition.name, None))
@@ -58,25 +76,25 @@ def save_edition(edition, cursor):
     ids_authors = save_persons(edition.authors, cursor)
     for id_author in ids_authors:
         exist_connection = cursor.execute("SELECT * FROM edition_author WHERE edition = ? AND editor = ?",
-                                          (edition_id, id_author))
-        if exist_connection:
+                                          (edition_id, id_author)).fetchall()
+        if not exist_connection:
             cursor.execute("INSERT INTO edition_author (edition, editor) VALUES (?, ?)", (edition_id, id_author))
 
     return edition_id
 
 
-# save compostion method, method check whether composition is not in the db, but not only on score table but also
-# on person and voice table, because two composition are same only when authors(persons) and voices are same too
+# save composition method, method check whether composition is not in the db, but not only in score table but also
+# on person and voice table, because two composition are same ONLY when authors(persons) and voices are same too
 def save_composition(composition, cursor):
     exist_compositions = cursor.execute("SELECT * FROM score WHERE "
-                                       "name IS ? AND genre IS ? AND key IS ? AND incipit IS ? AND year IS ?",
-                                       (composition.name, composition.genre, composition.key, composition.incipit,
-                                        composition.year)).fetchall()
-
+                                        "name IS ? AND genre IS ? AND key IS ? AND incipit IS ? AND year IS ?",
+                                        (composition.name, composition.genre, composition.key, composition.incipit,
+                                         composition.year)).fetchall()
+    # founded same compositions in DB on basic parameters, they have to be checked on composers and voices
     if exist_compositions:
         exactly_same = False
-        for exist_composition in exist_compositions: #can be more same composition in db, if found at least one exactly same
-            #  composition exist in db but it might not be same because authors and voices can be different
+        # can be more same composition in db, if found at least one exactly same, break search
+        for exist_composition in exist_compositions:
             composition_id = exist_composition[0]
             composers_name_for_this_composition = cursor.execute("SELECT person.name FROM score_author JOIN person "
                                                                  "WHERE score_author.score = ? AND "
@@ -93,8 +111,9 @@ def save_composition(composition, cursor):
         # for doesn't found any exactly same composition in DB we can add it to db
         if not exactly_same:
             cursor.execute("INSERT INTO score (name, genre, key, incipit, year) VALUES (?, ?, ?, ?, ?)",
-                           (composition.name, composition.genre, composition.key, composition.incipit, composition.year))
+                          (composition.name, composition.genre, composition.key, composition.incipit, composition.year))
             composition_id = cursor.lastrowid
+    # in db is not similar composition, just add this one
     else:
         cursor.execute("INSERT INTO score (name, genre, key, incipit, year) VALUES (?, ?, ?, ?, ?)",
                        (composition.name, composition.genre, composition.key, composition.incipit, composition.year))
