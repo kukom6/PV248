@@ -4,24 +4,16 @@ import sqlite3
 
 sql_schema = open("./scorelib.sql", 'r', encoding='UTF8').read()
 
-
 def main():
     if len(sys.argv) != 3:
         print("Numbers of parameter are wrong")
     else:
-        toDb(scorelib.load(sys.argv[1]))
+        to_db(scorelib.load(sys.argv[1]))
 
 
-def toDb(prints):
+def to_db(prints):
     connection = sqlite3.connect(sys.argv[2])
     cursor = connection.cursor()
-    cursor.execute("DROP TABLE person")
-    cursor.execute("DROP TABLE score")
-    cursor.execute("DROP TABLE voice")
-    cursor.execute("DROP TABLE edition")
-    cursor.execute("DROP TABLE score_author")
-    cursor.execute("DROP TABLE edition_author")
-    cursor.execute("DROP TABLE print")
 
     table_exist = cursor.execute("SELECT name "
                                  "FROM sqlite_master "
@@ -32,7 +24,6 @@ def toDb(prints):
 
     for one_print in prints:
         save_print(one_print, cursor)
-
     cursor.close()
     connection.commit()
 
