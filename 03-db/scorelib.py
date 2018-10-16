@@ -134,6 +134,9 @@ class Voice:
         self.name = name
         self.range = range
 
+    def __eq__(self, other):
+        return self.name == other.name and self.range == other.range
+
 
 class Person:
     def __init__(self, name, born, died):
