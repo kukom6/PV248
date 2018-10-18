@@ -18,7 +18,7 @@ def to_db(prints):
     table_exist = cursor.execute("SELECT name "
                                  "FROM sqlite_master "
                                  "WHERE type='table' "
-                                 "AND name IN ('person','score','voice','editio','score','author','edition','author','print');").fetchall()
+                                 "AND name IN ('person','score','voice','edition','score_author','edition_author','print');").fetchall()
     if not table_exist:
         cursor.executescript(sql_schema)
 
@@ -48,7 +48,10 @@ def save_edition(edition, cursor):
                                                                  "WHERE edition_author.edition = ? AND "
                                                                  "edition_author.editor=person.id",
                                                                  (edition_id,)).fetchall()
-            if same_persons(edition.authors, editors_for_this_editor):
+            #  need to check whether the composition are same, in case function save_composition return key which is not
+            #  in the db, the editor cannot be same, but when function returns id which is in DB need to check whether
+            # id belongs to the specific composition
+            if same_persons(edition.authors, editors_for_this_editor) and composition_are_same(id_compostion, edition_id, cursor):
                 edition_id = exist_composition[0]
                 exactly_same = True
                 break
@@ -72,6 +75,15 @@ def save_edition(edition, cursor):
             cursor.execute("INSERT INTO edition_author (edition, editor) VALUES (?, ?)", (edition_id, id_author))
 
     return edition_id
+
+
+def composition_are_same(id_composition,  edition_id, cursor):
+    editors_for_this_editor = cursor.execute("SELECT * FROM edition JOIN score "
+                                             "WHERE edition.score = score.id "
+                                             "AND edition.id = ? "
+                                             "AND score.id = ?",
+                                             (id_composition, edition_id)).fetchone()
+    return editors_for_this_editor
 
 
 # save composition method, method check whether the composition is not in the DB, but not only in score table but
