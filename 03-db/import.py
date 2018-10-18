@@ -18,9 +18,18 @@ def to_db(prints):
     table_exist = cursor.execute("SELECT name "
                                  "FROM sqlite_master "
                                  "WHERE type='table' "
-                                 "AND name IN ('person','score','voice','edition','score_author','edition_author','print');").fetchall()
-    if not table_exist:
-        cursor.executescript(sql_schema)
+                                 "AND name IN ('person','score','voice','edition','score_author',"
+                                 "'edition_author','print');").fetchall()
+    if table_exist:
+        cursor.execute("DROP TABLE person")
+        cursor.execute("DROP TABLE score")
+        cursor.execute("DROP TABLE voice")
+        cursor.execute("DROP TABLE edition")
+        cursor.execute("DROP TABLE score_author")
+        cursor.execute("DROP TABLE edition_author")
+        cursor.execute("DROP TABLE print")
+
+    cursor.executescript(sql_schema)
 
     for one_print in prints:
         save_print(one_print, cursor)
