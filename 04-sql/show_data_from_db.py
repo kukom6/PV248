@@ -4,6 +4,7 @@ import sqlite3
 
 
 # import data from DB to clases and print they to console as from file, diff check integrity of data
+# show_data_from_text == show_data_from_db
 def main():
     if len(sys.argv) != 2:
         print("Numbers of parameter are wrong")

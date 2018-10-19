@@ -1,8 +1,8 @@
-
 import sys
 import scorelib
 
 
+# show_data_from_text == show_data_from_db
 def main():
     if len(sys.argv) != 2:
         print("Numbers of parameter are wrong")
