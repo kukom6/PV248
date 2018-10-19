@@ -92,7 +92,7 @@ venv.bak/
 
 # Spyder project settings
 .spyderproject
-.spyproject
+.spyproject*/
 
 # Rope project settings
 .ropeproject
@@ -104,3 +104,10 @@ venv.bak/
 .mypy_cache/
 
 */.idea
+
+*/sqldiff.exe
+*/sqlite3.exe
+*/sqlite3_analyzer.exe
+*/test.txt
+*/queries
+*/scorelib.dat
