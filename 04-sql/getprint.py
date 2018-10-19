@@ -5,7 +5,6 @@ import json
 database = "scorelib.dat"
 
 
-# show_data_from_text == show_data_from_db
 def main():
     if len(sys.argv) != 2:
         print("Numbers of parameter are wrong")
@@ -31,6 +30,7 @@ def print_print(print_id):
             result_composer['died'] = composer[2]
         result.append(result_composer)
     print(json.dumps(result, indent=4, ensure_ascii=False))
+    cursor.close()
 
 
 main()
