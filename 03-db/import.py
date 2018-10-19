@@ -91,7 +91,7 @@ def composition_are_same(id_composition,  edition_id, cursor):
                                              "WHERE edition.score = score.id "
                                              "AND edition.id = ? "
                                              "AND score.id = ?",
-                                             (id_composition, edition_id)).fetchone()
+                                             (edition_id, id_composition)).fetchone()
     return editors_for_this_editor
 
 
