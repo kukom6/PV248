@@ -46,7 +46,8 @@ def save_print(print, cursor):
 # save edition method, two editions are same ONLY if edition and editor are same
 def save_edition(edition, cursor):
     id_compostion = save_composition(edition.composition, cursor)
-    exist_editions = cursor.execute("SELECT * FROM edition WHERE name = ?", (edition.name,)).fetchall()
+    exist_editions = \
+        cursor.execute("SELECT * FROM edition WHERE name IS ? AND year IS ?", (edition.name, edition.year)).fetchall()
 
     # found editions with the same name, need to check editors whether are same
     if exist_editions:
@@ -67,12 +68,12 @@ def save_edition(edition, cursor):
         # for didn't find any same edition with editors in DB, edition can be added to DB
         if not exactly_same:
             cursor.execute("INSERT INTO edition (score, name, year) VALUES (?, ?, ?)",
-                           (id_compostion, edition.name, None))
+                           (id_compostion, edition.name, edition.year))
             edition_id = cursor.lastrowid
     # in db is not similar edition, just add this one
     else:
         cursor.execute("INSERT INTO edition (score, name, year) VALUES (?, ?, ?)",
-                       (id_compostion, edition.name, None))
+                       (id_compostion, edition.name, edition.year))
         edition_id = cursor.lastrowid
 
     # Save persons and create connection M:N

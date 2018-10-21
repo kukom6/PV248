@@ -53,13 +53,14 @@ def parse_print_object_to_dictionary(print_object):
         result['Key'] = print_object.edition.composition.key
     if print_object.edition.composition.year:
         result['Composition Year'] = print_object.edition.composition.year
-    # result['Publication Year'] =
+    if print_object.edition.year:
+        result['Publication Year'] = print_object.edition.year
     if print_object.edition.name:
         result['Edition'] = print_object.edition.name
     result['Editor'] = parse_people_list_to_dictonary(print_object.edition.authors)
     result['Voices'] = parse_voices_list_to_dictonary(print_object.edition.composition.voices)
     if print_object.partiture:
-        result['Partiture'] = 'Y' if print_object.partiture else 'N'
+        result['Partiture'] = print_object.partiture
     if print_object.edition.composition.incipit:
         result['Incipit'] = print_object.edition.composition.incipit
     return result

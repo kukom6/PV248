@@ -9,12 +9,13 @@ def parse_print(cursor, print_id):
 
 
 def parse_edition(cursor, edition_id):
-    edition = cursor.execute("SELECT score, name FROM edition WHERE edition.id=?", (edition_id,)).fetchone()
+    edition = cursor.execute("SELECT score, name, year FROM edition WHERE edition.id=?", (edition_id,)).fetchone()
     composition_id = edition[0]
     edition_name = edition[1]
+    edition_year = edition[2]
     authors = parse_authors(cursor, edition_id)
     composition = parse_composition(cursor, composition_id)
-    return scorelib.Edition(composition, authors, edition_name)
+    return scorelib.Edition(composition, authors, edition_name, edition_year)
 
 
 def parse_composition(cursor, composition_id):

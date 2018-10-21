@@ -43,6 +43,11 @@ class Print:
             print("Composition Year: {}".format(year))
         #  print Edition
         edition = self.edition
+        edition_year = edition.year
+        if edition_year is None:
+            print("Publication Year: ")
+        else:
+            print("Publication Year: {}".format(edition_year))
         edition_name = edition.name
         if edition_name is None:
             print("Edition: ")
@@ -112,10 +117,11 @@ class Print:
 
 
 class Edition:
-    def __init__(self, composition, authors, name):
+    def __init__(self, composition, authors, name, year):
         self.composition = composition
         self.authors = authors
         self.name = name
+        self.year = year
 
 
 class Composition:
@@ -182,7 +188,12 @@ def parse_edition(part):
             edition_name = None
     persons = parse_persons_from_editor(part)
     composition = parse_composition(part)
-    return Edition(composition, persons, edition_name)
+    year_search = re.search(r"Publication Year: .*(\d{4}).*", part)
+    if year_search is None:
+        year = None
+    else:
+        year = int(year_search.group(1).strip())
+    return Edition(composition, persons, edition_name, year)
 
 
 def parse_persons_from_editor(part):
