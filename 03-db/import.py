@@ -46,7 +46,7 @@ def save_print(print, cursor):
 # save edition method, two editions are same ONLY if edition and editor are same
 def save_edition(edition, cursor):
     id_compostion = save_composition(edition.composition, cursor)
-    exist_editions = cursor.execute("SELECT * FROM edition WHERE name = ?", (edition.name,)).fetchall()
+    exist_editions = cursor.execute("SELECT * FROM edition WHERE name IS ?", (edition.name,)).fetchall()
 
     # found editions with the same name, need to check editors whether are same
     if exist_editions:
