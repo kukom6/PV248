@@ -1,6 +1,5 @@
 import sys
 import csv
-import json
 import numpy
 import utilities
 
@@ -13,13 +12,13 @@ def main():
         data = utilities.parse_csv_to_dict(csv_reader)
         mode = sys.argv[2]
         if mode == 'dates':
-            print(json.dumps(dates(data), indent=4, ensure_ascii=False))
+            utilities.print_dict_as_json(dates(data))
         elif mode == 'deadlines':
-            print(json.dumps(deadlines(data), indent=4, ensure_ascii=False))
+            utilities.print_dict_as_json(deadlines(data))
         elif mode == 'exercises':
-            print(json.dumps(exercises(data), indent=4, ensure_ascii=False))
+            utilities.print_dict_as_json(exercises(data))
         else:
-            print("{} mode is unsupported".format(mode))
+            sys.stderr.write("{} mode is unsupported".format(mode))
 
 
 def dates(data):
@@ -36,14 +35,6 @@ def exercises(data):
     return create_dict_for_print(merged_data)
 
 
-def passed(array):
-    result = 0
-    for value in array:
-        if value > 0:
-            result += 1
-    return result
-
-
 # Create dictionary for output
 def create_dict_for_print(data):
     result = {}
@@ -55,11 +46,8 @@ def create_dict_for_print(data):
         result[column]["median"] = numpy.median(data[column])
         result[column]["first"] = numpy.percentile(data[column], 25)
         result[column]["last"] = numpy.percentile(data[column], 75)
-        result[column]["passed"] = passed(data[column])
+        result[column]["passed"] = utilities.passed(data[column])
     return result
-
-
-
 
 
 main()

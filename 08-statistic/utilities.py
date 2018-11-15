@@ -1,4 +1,5 @@
 import copy
+import json
 
 
 # Parse CSV to dictionary
@@ -19,6 +20,7 @@ def merge_date_columns(data):
     result = {}
     for originalColumn in data:
         if originalColumn == 'student':
+            result['student'] = copy.deepcopy(data['student'])
             continue
         date = originalColumn.split("/")[0]
         if date not in result.keys():
@@ -34,6 +36,7 @@ def merge_exercise_columns(data):
     result = {}
     for originalColumn in data:
         if originalColumn == 'student':
+            result['student'] = copy.deepcopy(data['student'])
             continue
         exercise = originalColumn.split("/")[1]
         if exercise not in result.keys():
@@ -42,3 +45,17 @@ def merge_exercise_columns(data):
             for index, cell in enumerate(data[originalColumn]):
                 result[exercise][index] += cell
     return result
+
+
+# How many passed
+def passed(array):
+    result = 0
+    for value in array:
+        if value > 0:
+            result += 1
+    return result
+
+
+# For manage this print in one place of code
+def print_dict_as_json(dictionary):
+    print(json.dumps(dictionary, indent=4, ensure_ascii=False))
