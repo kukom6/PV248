@@ -35,6 +35,9 @@ def main():
         # 1D -> 2D array; (https://stackoverflow.com/questions/12575421/convert-a-1d-array-to-a-2d-array-in-numpy )
         # due to exception Array must be two-dimensional
         a = numpy.expand_dims(numpy.array(diff_from_start_semester), axis=1)
+        # add zero values (interception should be 0 ) fixed slope = -0.0 https://stackoverflow.com/questions/8486294/how-to-add-an-extra-column-to-a-numpy-array?rq=1
+        a = numpy.insert(a, 1, values=0, axis=1)
+
         b = numpy.array(accumulated_points)
 
         slope = numpy.linalg.lstsq(a, b, rcond=1)[0][0]
