@@ -28,7 +28,7 @@ def merge_date_columns(data):
         else:  # date is already in result
             for index, cell in enumerate(data[originalColumn]):
                 result[date][index] += cell
-    return result
+    return sortDict(result)
 
 
 # Merge column according exercise, e.g. 1.1.2018/2 7.1.2018/2 merge (sum values) into one column 2
@@ -44,7 +44,7 @@ def merge_exercise_columns(data):
         else:  # exercise is already in result
             for index, cell in enumerate(data[originalColumn]):
                 result[exercise][index] += cell
-    return result
+    return sortDict(result)
 
 
 # How many passed
@@ -59,3 +59,9 @@ def passed(array):
 # For manage this print in one place of code
 def print_dict_as_json(dictionary):
     print(json.dumps(dictionary, indent=4, ensure_ascii=False))
+
+def sortDict(dictonary):
+    result = {}
+    for key in sorted(dictonary.keys()):
+        result[key] = dictonary[key]
+    return result

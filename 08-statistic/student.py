@@ -28,9 +28,10 @@ def main():
         result["total"] = sum(exercise_data)
         result["passed"] = utilities.passed(exercise_data)
 
-        points_per_day = points_only_for_student(utilities.merge_date_columns(data), student_id)
+        sorted_merged_date_data = utilities.merge_date_columns(data)
+        points_per_day = points_only_for_student(sorted_merged_date_data, student_id)
         accumulated_points = numpy.cumsum(points_per_day)
-        diff_from_start_semester = get_date_diff_from_start(data)
+        diff_from_start_semester = get_date_diff_from_start(sorted_merged_date_data)
 
         # 1D -> 2D array; (https://stackoverflow.com/questions/12575421/convert-a-1d-array-to-a-2d-array-in-numpy )
         # due to exception Array must be two-dimensional
@@ -74,13 +75,14 @@ def points_only_for_student(data, student_id):
 
 
 # https://stackoverflow.com/questions/151199/how-do-i-calculate-number-of-days-between-two-dates-using-python
-def get_date_diff_from_start(data):
+# sorted_date_data is sorted dictionary with merged column by date
+def get_date_diff_from_start(sorted_date_data):
     result = []
     dates = []
-    for originalColumn in data:
+    for originalColumn in sorted_date_data:
         if originalColumn == 'student':
             continue
-        date = originalColumn.split("/")[0]
+        date = originalColumn
         if date not in dates:
             dates.append(date)
     for date in dates:
